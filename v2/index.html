@@ -128,9 +128,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .briefing .when { font-size: 16px; font-weight: 700; margin: 0 0 var(--s2); }
 .briefing .mandatory { display: inline-block; background: #fdecea; color: var(--red); border: 1px solid var(--red); border-radius: 999px; padding: 2px 12px; font-size: 13px; font-weight: 700; margin: 0 0 var(--s4); }
 .briefing .btn { width: 100%; min-height: 44px; }
+/* Floating WhatsApp chat widget (bottom right) */
+.chat-widget { position: fixed; right: var(--s4); bottom: calc(var(--s4) + env(safe-area-inset-bottom)); z-index: 9; display: flex; align-items: center; justify-content: center; width: 56px; height: 56px; border-radius: 50%; background: #1a8f4c; color: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.35); text-decoration: none; }
+.chat-widget:hover { background: #147a40; }
+.chat-widget svg { width: 28px; height: 28px; fill: currentColor; }
 .fab { display: none; }
 @media (max-width: 768px) {
-  body { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
+  body { padding-bottom: calc(160px + env(safe-area-inset-bottom)); }
   .app-header { position: sticky; top: 0; z-index: 5; padding: 10px var(--s4); gap: var(--s2); }
   .header-actions { display: none; }
   .summary { flex-wrap: nowrap; overflow-x: auto; width: 100%; padding-bottom: var(--s1); }
@@ -149,9 +153,9 @@ button, input, select, textarea { font: inherit; color: inherit; }
   .move-wrap { font-size: 13px; }
   .move-wrap select, .confirm-delete button { min-height: 44px; font-size: 16px; padding: 0 var(--s3); }
   .icon-btn { min-width: 44px; min-height: 44px; font-size: 24px; }
-  .fab { display: flex; align-items: center; justify-content: center; position: fixed; right: var(--s4); bottom: calc(var(--s4) + env(safe-area-inset-bottom)); z-index: 8; min-height: 56px; padding: 0 var(--s5); border: 0; border-radius: 999px; background: var(--blue-600); color: #fff; font-weight: 700; font-size: 16px; box-shadow: 0 4px 14px rgba(11,42,74,0.4); cursor: pointer; }
+  .fab { display: flex; align-items: center; justify-content: center; position: fixed; right: var(--s4); bottom: calc(88px + env(safe-area-inset-bottom)); z-index: 8; min-height: 56px; padding: 0 var(--s5); border: 0; border-radius: 999px; background: var(--blue-600); color: #fff; font-weight: 700; font-size: 16px; box-shadow: 0 4px 14px rgba(11,42,74,0.4); cursor: pointer; }
   .fab:active { background: var(--blue-700); }
-  .toast-region { left: var(--s4); right: var(--s4); bottom: calc(88px + env(safe-area-inset-bottom)); max-width: none; }
+  .toast-region { left: var(--s4); right: var(--s4); bottom: calc(160px + env(safe-area-inset-bottom)); max-width: none; }
   .modal-backdrop { align-items: flex-end; padding: 0; }
   .modal { max-width: none; border-radius: 16px 16px 0 0; padding: var(--s4) var(--s4) calc(var(--s4) + env(safe-area-inset-bottom)); max-height: 92vh; overflow-y: auto; }
   .field input, .field select, .field textarea { min-height: 44px; font-size: 16px; }
@@ -243,6 +247,10 @@ button, input, select, textarea { font: inherit; color: inherit; }
     </form>
   </div>
 </div>
+
+<a class="chat-widget" id="chatWidget" href="https://wa.me/6512345678" target="_blank" rel="noopener noreferrer" aria-label="Chat with us on WhatsApp">
+  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 3h16a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H9l-5 4v-4H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3 5v2h10V8H7zm0 4v2h7v-2H7z"/></svg>
+</a>
 
 <dialog class="briefing" id="briefing" aria-labelledby="briefingTitle">
   <h2 id="briefingTitle">&#9888; IT Security Briefing</h2>
@@ -624,6 +632,20 @@ setup();
 /* ===== IT security briefing popup =====
    Shows once per page load after BRIEFING_DELAY_MS on the page (no storage APIs).
    Mirrors .claude/hooks/security-briefing.js; keep the two in sync. */
+/* ===== Chat widget voice greeting =====
+   Speaks CHAT_GREETING with the browser's built-in speech synthesis when the
+   widget is clicked, then lets the link open WhatsApp. Mirrors .claude/hooks/chat-voice.js. */
+const CHAT_GREETING = "How can I help you";
+document.getElementById("chatWidget").addEventListener("click", function () {
+  if (!("speechSynthesis" in window)) return;
+  try {
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(CHAT_GREETING);
+    u.lang = "en-US";
+    window.speechSynthesis.speak(u);
+  } catch (err) { /* voice is optional; the link still opens */ }
+});
+
 const BRIEFING_DELAY_MS = 10000;
 function showBriefing() {
   const dlg = document.getElementById("briefing");
