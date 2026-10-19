@@ -121,6 +121,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
 }
 
 /* ===== v2: mobile-first revamp ===== */
+/* Security briefing popup */
+.briefing { border: 0; border-top: 6px solid var(--red); border-radius: var(--radius); padding: var(--s5); max-width: 440px; width: calc(100% - 32px); color: var(--text); box-shadow: 0 12px 32px rgba(0,0,0,0.35); }
+.briefing::backdrop { background: rgba(11,42,74,0.6); }
+.briefing h2 { margin: 0 0 var(--s3); font-size: 20px; color: var(--blue-900); }
+.briefing .when { font-size: 16px; font-weight: 700; margin: 0 0 var(--s2); }
+.briefing .mandatory { display: inline-block; background: #fdecea; color: var(--red); border: 1px solid var(--red); border-radius: 999px; padding: 2px 12px; font-size: 13px; font-weight: 700; margin: 0 0 var(--s4); }
+.briefing .btn { width: 100%; min-height: 44px; }
 .fab { display: none; }
 @media (max-width: 768px) {
   body { padding-bottom: calc(88px + env(safe-area-inset-bottom)); }
@@ -236,6 +243,13 @@ button, input, select, textarea { font: inherit; color: inherit; }
     </form>
   </div>
 </div>
+
+<dialog class="briefing" id="briefing" aria-labelledby="briefingTitle">
+  <h2 id="briefingTitle">&#9888; IT Security Briefing</h2>
+  <p class="when">Town Hall &middot; Wednesday, 10:00 AM</p>
+  <p class="mandatory">Attendance is mandatory</p>
+  <button type="button" class="btn btn-primary" id="briefingOk">Got it</button>
+</dialog>
 
 <button type="button" class="fab" id="openAddFab" aria-label="Add task">+ Add Task</button>
 
@@ -606,6 +620,19 @@ function setup() {
   renderBoard();
 }
 setup();
+
+/* ===== IT security briefing popup =====
+   Shows once per page load after BRIEFING_DELAY_MS on the page (no storage APIs).
+   Mirrors .claude/hooks/security-briefing.js; keep the two in sync. */
+const BRIEFING_DELAY_MS = 10000;
+function showBriefing() {
+  const dlg = document.getElementById("briefing");
+  if (dlg && typeof dlg.showModal === "function" && !dlg.open) dlg.showModal();
+}
+document.getElementById("briefingOk").addEventListener("click", function () {
+  document.getElementById("briefing").close();
+});
+setTimeout(showBriefing, BRIEFING_DELAY_MS);
 </script>
 </body>
 </html>
